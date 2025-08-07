@@ -1,0 +1,118 @@
+# 📊 DevOps Pipeline Case Study – Project Report
+
+## ✅ Project Summary
+
+This case study demonstrates an end-to-end DevOps pipeline that builds, tests, provisions, configures, and deploys a simple Node.js application on an AWS EC2 instance using Docker, Terraform, Ansible, Jenkins, GitHub, and shell scripting.
+
+The pipeline is triggered via GitHub, which initiates Jenkins to build and push a Docker image, provision infrastructure via Terraform, and deploy the app using Ansible on an EC2 instance running on AWS Free Tier.
+
+---
+
+## 📌 Architecture Overview
+
+1. **Developer pushes code** → GitHub (`develop` branch)
+2. **Jenkins pipeline triggers** → clones code
+3. **Docker image is built** → pushed to DockerHub
+4. **Terraform runs** → creates AWS EC2 instance, security groups, VPC, subnet, Elastic IP
+5. **Ansible connects to EC2** → installs Docker, pulls image, runs container
+6. **User accesses app** via public IP → response: "Hello from Dockerized Node.js App!"
+
+---
+
+## 🌿 Git Branching Strategy
+
+- `main`: Stable, production-ready branch. Protected from direct pushes.
+- `develop`: Active development branch. Features are merged here.
+- `feature/*`: Short-lived branches for individual features or fixes.
+
+All merges to `main` must come via reviewed Pull Requests from `develop`.
+
+---
+
+## 🐳 Dockerization
+
+The Node.js app is packaged inside a Docker container. The Dockerfile defines the base image (`node:18-alpine`), installs dependencies, and sets the container to expose port 3000. A shell script automates the build and push of the image to DockerHub.
+
+Docker enables consistent and portable deployment across environments.
+
+---
+
+## ☁️ Terraform Provisioning
+
+Terraform is used to define and provision AWS infrastructure as code. The Terraform configuration does the following:
+
+- Creates a custom VPC and public subnet
+- Launches a `t2.micro` EC2 instance with a static Elastic IP
+- Attaches a security group allowing HTTP (port 80) and SSH (port 22)
+- Outputs the public IP address of the instance
+
+All configurations are modular, using variables for AWS region, instance type, and key pair name. The output is used by Ansible for remote access.
+
+---
+
+## 🛠️ Ansible Configuration
+
+Ansible connects to the newly created EC2 instance using SSH and performs configuration tasks, including:
+
+- Installing Docker on the EC2 instance
+- Pulling the pre-built Docker image from DockerHub
+- Running the container on port 80 (mapped to app's 3000)
+
+The inventory file (`hosts.ini`) includes the EC2's public IP, and the playbook (`deploy.yml`) defines all the deployment tasks in a repeatable, automated manner.
+
+---
+
+## 🔄 Jenkins CI/CD Pipeline
+
+Jenkins orchestrates the entire CI/CD process using a scripted pipeline defined in the `Jenkinsfile`. It performs the following stages:
+
+1. **Checkout** – Clones the code from the `develop` branch
+2. **Docker Build & Push** – Executes the build-and-push script
+3. **Terraform Apply** – Provisions infrastructure using Terraform scripts
+4. **Ansible Deploy** – Runs Ansible playbook to deploy the app to the EC2
+
+Jenkins runs either locally or on an EC2 VM and integrates with Docker, GitHub, Terraform, and Ansible via appropriate plugins and CLI tools.
+
+---
+
+## ⚙️ Shell Scripts
+
+Two shell scripts are used in the pipeline:
+
+- **`build_and_push.sh`**: Builds the Docker image and pushes it to DockerHub using the latest Git commit hash as a tag. Enables consistent versioning and reuse.
+- **`cleanup.sh`**: Cleans up unused Docker images, containers, and networks. Helps prevent disk space issues during development or CI runs.
+
+Both scripts are written with error handling and logging using `set -euo pipefail` for robustness.
+
+---
+
+## 📂 Folder Structure Explanation
+
+- `src/` – Contains the application source code (Node.js app)
+- `Dockerfile` – Describes how to build the Docker image
+- `package.json` – Contains metadata and dependencies for the app
+- `scripts/` – Shell scripts for build/push and cleanup
+- `infra/` – Terraform code for AWS infrastructure provisioning
+- `ansible/` – Hosts inventory and Ansible playbook for deployment
+- `Jenkinsfile` – Jenkins pipeline definition
+- `REPORT.md` – This documentation/report file
+  
+---
+
+## 🔐 Security Best Practices
+
+- Do NOT commit AWS credentials or `.pem` keys to GitHub
+- Use Jenkins credentials manager or environment variables for secrets
+- Add sensitive files to `.gitignore`:  
+  - `terraform.tfstate`  
+  - `*.pem`  
+  - `*.log`  
+  - `.env`
+
+---
+
+## ✅ Conclusion
+
+This project simulates a real-world CI/CD pipeline implementation using a cloud-native stack. It automates the entire software delivery process—from code push to production deployment—using open-source DevOps tools and Infrastructure as Code (IaC).
+
+It’s scalable, maintainable, and fully reproducible, offering hands-on experience with every stage of modern DevOps.
