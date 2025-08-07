@@ -108,6 +108,16 @@ Terraform is used to define and provision AWS infrastructure as code. The Terraf
 - Attaches a security group allowing HTTP (port 80) and SSH (port 22)
 - Outputs the public IP address of the instance
 
+AWS Infrastructure
+└── VPC (10.0.0.0/16)
+    └── Public Subnet (10.0.1.0/24)
+        └── EC2 Instance (t2.micro)
+            ├── Elastic IP (e.g., 13.234.123.45)
+            └── Security Group
+                ├── Allow SSH (22)
+                └── Allow HTTP (80)
+
+
 All configurations are modular, using variables for AWS region, instance type, and key pair name. The output is used by Ansible for remote access.
 
 ---
