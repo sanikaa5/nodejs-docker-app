@@ -109,6 +109,9 @@ Terraform is used to define and provision AWS infrastructure as code. The Terraf
 - Outputs the public IP address of the instance
 
 AWS Infrastructure
+
+```
+AWS Infrastructure
 └── VPC (10.0.0.0/16)
     └── Public Subnet (10.0.1.0/24)
         └── EC2 Instance (t2.micro)
@@ -116,6 +119,8 @@ AWS Infrastructure
             └── Security Group
                 ├── Allow SSH (22)
                 └── Allow HTTP (80)
+```
+
 
 
 All configurations are modular, using variables for AWS region, instance type, and key pair name. The output is used by Ansible for remote access.
