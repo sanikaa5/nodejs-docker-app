@@ -17,6 +17,69 @@ The pipeline is triggered via GitHub, which initiates Jenkins to build and push 
 5. **Ansible connects to EC2** → installs Docker, pulls image, runs container
 6. **User accesses app** via public IP → response: "Hello from Dockerized Node.js App!"
 
+                     +------------------+
+                     |   Developer PC   |
+                     | (Code, Git Push) |
+                     +--------+---------+
+                              |
+                              | 1. Git Push (code, Dockerfile, scripts)
+                              v
+                    +---------+----------+
+                    |      GitHub        |
+                    | (Code Repository)  |
+                    +---------+----------+
+                              |
+                              | 2. Webhook / Poll
+                              v
+         +--------------------+--------------------+
+         |                 Jenkins CI/CD           |
+         |         (Local or EC2 Jenkins Server)   |
+         +--------------------+--------------------+
+                              |
+                              | 3. Docker Build & Push
+                              v
+                    +--------+--------+
+                    |   Docker Engine |
+                    | (On Jenkins VM) |
+                    +--------+--------+
+                              |
+                              | 4. (Simulated) Push to DockerHub
+                              |
+                              | 5. Terraform Provisioning
+                              v
+                   +----------+-----------+
+                   |       AWS Cloud      |
+                   |    (via Terraform)   |
+                   +----------+-----------+
+                              |
+                +-------------+-------------+
+                |                           |
+        +-------v--------+         +--------v-------+
+        |  VPC & Subnet  |         |   Security     |
+        |   (main.tf)    |         |    Groups      |
+        +-------+--------+         +--------+-------+
+                |                           |
+                | 6. EC2 Instance Provision |
+                v
+         +------+-------+
+         |   EC2 (t2.micro)
+         |   Amazon Linux 2
+         +------+-------+
+                |
+                | 7. Ansible SSH into EC2
+                v
+         +------+-------+
+         |    Docker    |  <--- installed by Ansible
+         +------+-------+
+                |
+                | 8. Pull image & run container
+                v
+         +------+--------------------+
+         | Node.js App in Container |
+         |   (Port 3000 → 80)       |
+         +--------------------------+
+
+
 ---
 
 ## 🌿 Git Branching Strategy
