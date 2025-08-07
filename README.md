@@ -25,3 +25,7 @@
 
 
 <img width="1919" height="1004" alt="Screenshot 2025-08-07 134224" src="https://github.com/user-attachments/assets/61abe294-4107-4931-8e18-2ef6fc129bbf" />
+
+
+<img width="1472" height="752" alt="image" src="https://github.com/user-attachments/assets/39b9dd82-66ac-417b-b45d-db0093f90cd9" />
+
