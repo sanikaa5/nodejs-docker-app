@@ -12,3 +12,4 @@
 
 <img width="1762" height="1020" alt="Screenshot 2025-07-26 001117" src="https://github.com/user-attachments/assets/5055dd00-85f2-40f6-9a65-164c45e4556a" />
 
+<img width="1919" height="1004" alt="Screenshot 2025-08-07 134224" src="https://github.com/user-attachments/assets/61abe294-4107-4931-8e18-2ef6fc129bbf" />
