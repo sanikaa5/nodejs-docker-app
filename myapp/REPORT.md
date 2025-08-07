@@ -23,7 +23,6 @@ The pipeline is triggered via GitHub, which initiates Jenkins to build and push 
 
 - `main`: Stable, production-ready branch. Protected from direct pushes.
 - `develop`: Active development branch. Features are merged here.
-- `feature/*`: Short-lived branches for individual features or fixes.
 
 All merges to `main` must come via reviewed Pull Requests from `develop`.
 
