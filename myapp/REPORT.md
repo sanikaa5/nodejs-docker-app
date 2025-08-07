@@ -115,7 +115,7 @@ AWS Infrastructure
 └── VPC (10.0.0.0/16)
     └── Public Subnet (10.0.1.0/24)
         └── EC2 Instance (t2.micro)
-            ├── Elastic IP (e.g., 13.234.123.45)
+            ├── Elastic IP (13.234.123.45)
             └── Security Group
                 ├── Allow SSH (22)
                 └── Allow HTTP (80)
