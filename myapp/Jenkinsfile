@@ -2,38 +2,85 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "sanikaa5/node-app:${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "sanikaa5/nodejs-docker-app:latest"
+        CONTAINER_NAME = "nodejs-app-container"
+        TF_DIR = "terraform"
+        ANSIBLE_DIR = "ansible"
     }
 
     stages {
-        stage('Checkout') {
+
+        stage('Clone Repository') {
             steps {
-                git branch: 'develop', url: 'https://github.com/sanikaa5/nodejs-docker-app.git'
+                echo "Cloning repository..."
+                git branch: 'main', url: 'https://github.com/sanikaa5/nodejs-docker-app.git'
             }
         }
 
-        stage('Build & Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
-                sh 'chmod +x scripts/build_and_push.sh'
-                sh './scripts/build_and_push.sh'
+                echo "Building Docker image..."
+                sh """
+                docker build -t ${DOCKER_IMAGE} .
+                """
             }
         }
 
-        stage('Terraform Apply') {
+        stage('Run Container Locally') {
             steps {
-                dir('infra') {
-                    sh '''
-                    terraform init
-                    terraform apply -auto-approve
-                    '''
+                echo "Running container locally for validation..."
+                sh """
+                docker ps -q --filter "name=${CONTAINER_NAME}" | grep -q . && docker stop ${CONTAINER_NAME} && docker rm ${CONTAINER_NAME} || true
+                docker run -d -p 3000:3000 --name ${CONTAINER_NAME} ${DOCKER_IMAGE}
+                sleep 5
+                curl -f http://localhost:3000 || (echo "Container failed to start!" && exit 1)
+                """
+            }
+        }
+
+        stage('Provision Infrastructure with Terraform') {
+            steps {
+                dir("${TF_DIR}") {
+                    echo "Provisioning AWS infrastructure with Terraform..."
+                    sh """
+                    terraform init -input=false
+                    terraform apply -auto-approve -input=false
+                    """
                 }
             }
         }
 
-        stage('Ansible Deploy') {
+        stage('Deploy with Ansible') {
             steps {
-                sh 'ansible-playbook -i ansible/hosts.ini ansible/deploy.yml'
+                dir("${ANSIBLE_DIR}") {
+                    echo "Deploying to server with Ansible..."
+                    sh """
+                    ansible-playbook -i inventory.ini playbook.yml
+                    """
+                }
             }
+        }
+
+        stage('Deployment Complete') {
+            steps {
+                script {
+                    def publicIp = sh(
+                        script: "cd ${TF_DIR} && terraform output -raw instance_public_ip",
+                        returnStdout: true
+                    ).trim()
+                    echo "Application successfully deployed! Access it at: http://${publicIp}:3000"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Cleaning up local container..."
+            sh """
+            docker stop ${CONTAINER_NAME} || true
+            docker rm ${CONTAINER_NAME} || true
+            """
         }
     }
 }
